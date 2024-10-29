@@ -5,6 +5,8 @@ const port = process.env.PORT || 3001;
 const emailPassword = process.env.EMAILPASSWORD || "fakepassword";
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const nodemailer = require('nodemailer');
+const soapAsPromised = require('soap-as-promised');
+
 
 app.use(express.json());
 
@@ -136,6 +138,41 @@ app.post("/", async (req, res, next) => {
     });
 
     result = { message: "email sent successfully" };
+
+
+  } else if (toolName === "testApi") {
+
+    const url = 'https://api.smdservers.net/CCWs_3.5/CallCenterWs.asmx?WSDL';
+    try{
+      
+      const client = await soapAsPromised.createClientAsync(url);
+      const args = {
+        sCorpCode : "CCTST",
+        sLocationCode : "Demo",
+        sCorpUserName : "Administrator:::MYSTORAGKF8O89FYPI9F",
+        sCorpPassword : "Demo",
+        lngLastTimePolled : 0
+      };
+
+      const soapResult = await client.UnitsInformation_v2Async(args);
+
+      const x = JSON.stringify(soapResult);
+
+
+      res.send(soapResult);
+
+      next();
+      return;
+
+    }catch(e){
+      console.error(JSON.stringify(e));
+    }
+  
+ 
+
+
+
+    
 
 
   }
